@@ -25,6 +25,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -62,6 +64,7 @@ fun RegisterScreen(
             Manifest.permission.ACCESS_FINE_LOCATION,
         )
     )
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -71,10 +74,17 @@ fun RegisterScreen(
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     onEvent(RegisterEvent.OnSaveLocation(location.latitude, location.longitude))
+
                 }
             }.addOnFailureListener {
-                // Optionally handle failure, e.g., show a toast
+                onEvent(RegisterEvent.OnShowMessage(it.message.toString()))
             }
+        }
+    }
+
+    LaunchedEffect(state.message) {
+        if (state.message.isNotBlank()) {
+            snackbarHostState.showSnackbar(state.message)
         }
     }
 
@@ -95,7 +105,8 @@ fun RegisterScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier

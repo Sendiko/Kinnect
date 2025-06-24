@@ -20,8 +20,13 @@ class RegisterViewModel : ViewModel() {
             is RegisterEvent.OnPasswordChanged -> changePassword(event.password)
             is RegisterEvent.OnPasswordVisibilityChanged -> changePasswordVisibility(event.visible)
             is RegisterEvent.OnPermissionGranted -> grantPermission(event.granted)
+            is RegisterEvent.OnShowMessage -> showMessage(event.message)
             RegisterEvent.OnRegisterClicked -> register()
         }
+    }
+
+    private fun showMessage(message: String) {
+        _state.update { it.copy(message = message) }
     }
 
     private fun grantPermission(granted: Boolean) {
@@ -29,8 +34,7 @@ class RegisterViewModel : ViewModel() {
     }
 
     private fun saveGeoLocation(latitude: Double, longitude: Double) {
-        _state.update { it.copy(latitude = latitude, longitude = longitude) }
-        Log.i("GEO_LOCATION", "saveGeoLocation: Latitude -> $latitude, Longitude -> $longitude")
+        _state.update { it.copy(latitude = latitude, longitude = longitude, message = "Location granted.") }
     }
 
     private fun changeFullName(fullName: String) {
