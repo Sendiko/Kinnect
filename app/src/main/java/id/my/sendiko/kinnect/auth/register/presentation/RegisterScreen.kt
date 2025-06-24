@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -23,7 +27,9 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -111,7 +117,8 @@ fun RegisterScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Column(
@@ -136,124 +143,161 @@ fun RegisterScreen(
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
             ) {
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .padding(16.dp)
                         .fillMaxWidth(),
                 ) {
-                    Text(
-                        text = stringResource(R.string.register_title),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Text(
-                        text = stringResource(R.string.register_subtitle)
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(R.string.full_name_label),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    BaseTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = state.fullName,
-                        hint = stringResource(R.string.full_name_hint),
-                        onValueChange = { onEvent(RegisterEvent.OnFullNameChanged(it)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = stringResource(R.string.full_name_label)
-                            )
-                        }
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(R.string.email_label),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    BaseTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = state.email,
-                        hint = stringResource(R.string.email_hint),
-                        onValueChange = { onEvent(RegisterEvent.OnEmailChanged(it)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Email,
-                                contentDescription = stringResource(R.string.email_label)
-                            )
-                        }
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(R.string.password_label),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    SecureTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = state.password,
-                        hint = stringResource(R.string.create_password_hint),
-                        onValueChange = { onEvent(RegisterEvent.OnPasswordChanged(it)) },
-                        isVisible = state.passwordVisible,
-                        onVisibilityChanged = { onEvent(RegisterEvent.OnPasswordVisibilityChanged(it)) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = stringResource(R.string.password_label)
-                            )
-                        }
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    AnimatedVisibility(
-                        visible = !locationPermissionsState.allPermissionsGranted,
-                        enter = slideInHorizontally(),
-                        exit = slideOutHorizontally()
-                    ) {
-                        Surface(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                val textToShow = if (locationPermissionsState.shouldShowRationale) {
-                                    stringResource(R.string.request_location_1)
-                                } else {
-                                    stringResource(R.string.request_location_2)
-                                }
-                                Text(
-                                    text = textToShow,
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.bodyMedium
+                    item {
+                        Text(
+                            text = stringResource(R.string.register_title),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            text = stringResource(R.string.register_subtitle)
+                        )
+                    }
+                    item {
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.full_name_label),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        BaseTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = state.fullName,
+                            hint = stringResource(R.string.full_name_hint),
+                            onValueChange = { onEvent(RegisterEvent.OnFullNameChanged(it)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = stringResource(R.string.full_name_label)
                                 )
-                                Spacer(Modifier.height(8.dp))
-                                Button(onClick = { locationPermissionsState.launchMultiplePermissionRequest() }) {
-                                    Text(stringResource(R.string.grant_permission))
+                            }
+                        )
+                    }
+                    item {
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.email_label),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        BaseTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = state.email,
+                            hint = stringResource(R.string.email_hint),
+                            onValueChange = { onEvent(RegisterEvent.OnEmailChanged(it)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Email,
+                                    contentDescription = stringResource(R.string.email_label)
+                                )
+                            }
+                        )
+                    }
+                    item {
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.age_label),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = state.age,
+                            shape = RoundedCornerShape(16.dp),
+                            onValueChange = {
+                                if (it.length <= 3) {
+                                    onEvent(RegisterEvent.OnAgeChanged(it))
+                                }
+                            },
+                            placeholder = { Text(stringResource(R.string.age_hint)) },
+                            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.End),
+                            trailingIcon = {
+                                Text(
+                                    text = stringResource(R.string.years_old),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        )
+                    }
+                    item {
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            text = stringResource(R.string.password_label),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        SecureTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = state.password,
+                            hint = stringResource(R.string.create_password_hint),
+                            onValueChange = { onEvent(RegisterEvent.OnPasswordChanged(it)) },
+                            isVisible = state.passwordVisible,
+                            onVisibilityChanged = { onEvent(RegisterEvent.OnPasswordVisibilityChanged(it)) },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = stringResource(R.string.password_label)
+                                )
+                            }
+                        )
+                    }
+                    item {
+                        Spacer(Modifier.height(16.dp))
+                        AnimatedVisibility(
+                            visible = !locationPermissionsState.allPermissionsGranted,
+                            enter = slideInHorizontally(),
+                            exit = slideOutHorizontally()
+                        ) {
+                            Surface(
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    val textToShow = if (locationPermissionsState.shouldShowRationale) {
+                                        stringResource(R.string.request_location_1)
+                                    } else {
+                                        stringResource(R.string.request_location_2)
+                                    }
+                                    Text(
+                                        text = textToShow,
+                                        textAlign = TextAlign.Center,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Button(onClick = { locationPermissionsState.launchMultiplePermissionRequest() }) {
+                                        Text(stringResource(R.string.grant_permission))
+                                    }
                                 }
                             }
                         }
                     }
-                    Spacer(Modifier.height(16.dp))
-                    Button(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { onEvent(RegisterEvent.OnRegisterClicked) },
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.register_title)
-                        )
-                    }
-                    TextButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            locationPermissionsState.launchMultiplePermissionRequest()
-                            onEvent(RegisterEvent.OnRegisterClicked)
-                      },
-                    ) {
-                        Text(
-                            text = stringResource(R.string.login_here)
-                        )
+                    item {
+                        Spacer(Modifier.height(16.dp))
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { onEvent(RegisterEvent.OnRegisterClicked) },
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.register_title)
+                            )
+                        }
+                        TextButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                locationPermissionsState.launchMultiplePermissionRequest()
+                                onEvent(RegisterEvent.OnRegisterClicked)
+                            },
+                        ) {
+                            Text(
+                                text = stringResource(R.string.login_here)
+                            )
+                        }
                     }
                 }
             }

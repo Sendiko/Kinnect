@@ -1,12 +1,17 @@
 package id.my.sendiko.kinnect.auth.register.presentation
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import id.my.sendiko.kinnect.auth.core.domain.RegisterRepository
+import id.my.sendiko.kinnect.auth.core.domain.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel(
+    private val repository: RegisterRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(RegisterState())
     val state = _state.asStateFlow()
@@ -46,7 +51,7 @@ class RegisterViewModel : ViewModel() {
     }
 
     private fun changeAge(age: String) {
-        _state.update { it.copy(age = age.toInt()) }
+        _state.update { it.copy(age = age) }
     }
 
     private fun changePassword(password: String) {
@@ -58,6 +63,23 @@ class RegisterViewModel : ViewModel() {
     }
 
     private fun register() {
-
+        viewModelScope.launch {
+            repository.selectAllUsers().collect {
+                val newUsers = User(
+                    fullName = state.value.fullName,
+                    email = state.value.email,
+                    age = state.value.age.toInt(),
+                    password = state.value.password,
+                    latitude = state.value.latitude,
+                    longitude = state.value.longitude
+                )
+                if (it.contains(newUsers)) {
+                    _state.update { it.copy(message = "User already exists.") }
+                } else {
+                    repository.insertUser(newUsers)
+                    _state.update { it.copy(message = "User registered successfully.") }
+                }
+            }
+        }
     }
 }
