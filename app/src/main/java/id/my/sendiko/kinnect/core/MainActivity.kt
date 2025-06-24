@@ -10,11 +10,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import id.my.sendiko.kinnect.auth.login.LoginScreen
 import id.my.sendiko.kinnect.auth.register.data.RegisterRepositoryImpl
 import id.my.sendiko.kinnect.auth.register.presentation.RegisterScreen
 import id.my.sendiko.kinnect.auth.register.presentation.RegisterViewModel
 import id.my.sendiko.kinnect.core.di.KinnectApp
 import id.my.sendiko.kinnect.core.di.viewModelFactory
+import id.my.sendiko.kinnect.core.navigation.LoginDestination
 import id.my.sendiko.kinnect.core.navigation.RegisterDestination
 import id.my.sendiko.kinnect.core.ui.theme.KinnectTheme
 
@@ -42,8 +44,14 @@ class MainActivity : ComponentActivity() {
 
                         RegisterScreen(
                             state = state,
-                            onEvent = viewModel::onEvent
+                            onEvent = viewModel::onEvent,
+                            onNavigate = {
+                                navController.navigate(it)
+                            }
                         )
+                    }
+                    composable<LoginDestination> {
+                        LoginScreen()
                     }
                 }
             }
