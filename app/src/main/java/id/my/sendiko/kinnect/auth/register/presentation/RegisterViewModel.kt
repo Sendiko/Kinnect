@@ -77,7 +77,7 @@ class RegisterViewModel(
                     _state.update { it.copy(message = "User already exists.") }
                 } else {
                     repository.insertUser(newUsers)
-                    _state.update { it.copy(message = "User registered successfully.") }
+                    _state.update { it.copy(message = "User registered successfully.", isSuccess = true) }
                 }
             }
         }

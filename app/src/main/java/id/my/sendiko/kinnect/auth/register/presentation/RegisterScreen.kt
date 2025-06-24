@@ -53,6 +53,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationServices
 import id.my.sendiko.kinnect.R
 import id.my.sendiko.kinnect.auth.core.presentation.SecureTextField
+import id.my.sendiko.kinnect.core.navigation.LoginDestination
 import id.my.sendiko.kinnect.core.ui.component.BaseTextField
 import id.my.sendiko.kinnect.core.ui.theme.KinnectTheme
 
@@ -61,7 +62,8 @@ import id.my.sendiko.kinnect.core.ui.theme.KinnectTheme
 @Composable
 fun RegisterScreen(
     state: RegisterState,
-    onEvent: (RegisterEvent) -> Unit
+    onEvent: (RegisterEvent) -> Unit,
+    onNavigate: (Any) -> Unit,
 ) {
 
     val locationPermissionsState = rememberMultiplePermissionsState(
@@ -74,6 +76,12 @@ fun RegisterScreen(
 
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            onNavigate(LoginDestination)
+        }
+    }
 
     LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
         if (locationPermissionsState.allPermissionsGranted) {
@@ -311,7 +319,8 @@ private fun RegisterScreenPrev() {
     KinnectTheme {
         RegisterScreen(
             state = RegisterState(),
-            onEvent = {  }
+            onEvent = {  },
+            onNavigate = {  }
         )
     }
 }
