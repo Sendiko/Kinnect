@@ -1,6 +1,5 @@
-package id.my.sendiko.kinnect.ui.theme
+package id.my.sendiko.kinnect.core
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

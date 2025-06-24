@@ -1,4 +1,4 @@
-package id.my.sendiko.kinnect.ui.theme
+package id.my.sendiko.kinnect.core
 
 import androidx.compose.ui.graphics.Color
 
