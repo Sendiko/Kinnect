@@ -8,5 +8,7 @@ data class RegisterState(
     val passwordVisible: Boolean = false,
     val message: String = "",
     val isSuccess: Boolean = false,
-    val location: String = ""
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val isPermissionGranted: Boolean = false
 )

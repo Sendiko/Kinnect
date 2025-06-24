@@ -1,5 +1,6 @@
 package id.my.sendiko.kinnect.auth.register.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,13 +13,24 @@ class RegisterViewModel : ViewModel() {
 
     fun onEvent(event: RegisterEvent) {
         when(event) {
+            is RegisterEvent.OnSaveLocation -> saveGeoLocation(event.latitude, event.longitude)
             is RegisterEvent.OnFullNameChanged -> changeFullName(event.fullName)
             is RegisterEvent.OnEmailChanged -> changeEmail(event.email)
             is RegisterEvent.OnAgeChanged -> changeAge(event.age)
             is RegisterEvent.OnPasswordChanged -> changePassword(event.password)
             is RegisterEvent.OnPasswordVisibilityChanged -> changePasswordVisibility(event.visible)
+            is RegisterEvent.OnPermissionGranted -> grantPermission(event.granted)
             RegisterEvent.OnRegisterClicked -> register()
         }
+    }
+
+    private fun grantPermission(granted: Boolean) {
+        _state.update { it.copy(isPermissionGranted = granted) }
+    }
+
+    private fun saveGeoLocation(latitude: Double, longitude: Double) {
+        _state.update { it.copy(latitude = latitude, longitude = longitude) }
+        Log.i("GEO_LOCATION", "saveGeoLocation: Latitude -> $latitude, Longitude -> $longitude")
     }
 
     private fun changeFullName(fullName: String) {

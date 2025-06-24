@@ -1,6 +1,10 @@
 package id.my.sendiko.kinnect.auth.register.presentation
 
-import android.widget.Space
+import android.Manifest
+import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,22 +30,54 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.android.gms.location.LocationServices
 import id.my.sendiko.kinnect.R
 import id.my.sendiko.kinnect.auth.core.presentation.SecureTextField
 import id.my.sendiko.kinnect.core.ui.component.BaseTextField
 import id.my.sendiko.kinnect.core.ui.theme.KinnectTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@SuppressLint("MissingPermission")
 @Composable
 fun RegisterScreen(
     state: RegisterState,
     onEvent: (RegisterEvent) -> Unit
 ) {
+
+    val locationPermissionsState = rememberMultiplePermissionsState(
+        listOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+        )
+    )
+
+    val context = LocalContext.current
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
+        if (locationPermissionsState.allPermissionsGranted) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    onEvent(RegisterEvent.OnSaveLocation(location.latitude, location.longitude))
+                }
+            }.addOnFailureListener {
+                // Optionally handle failure, e.g., show a toast
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -90,7 +126,8 @@ fun RegisterScreen(
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier
+                        .padding(16.dp)
                         .fillMaxWidth(),
                 ) {
                     Text(
@@ -154,6 +191,39 @@ fun RegisterScreen(
                         }
                     )
                     Spacer(Modifier.height(16.dp))
+                    AnimatedVisibility(
+                        visible = !locationPermissionsState.allPermissionsGranted,
+                        enter = slideInHorizontally(),
+                        exit = slideOutHorizontally()
+                    ) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                val textToShow = if (locationPermissionsState.shouldShowRationale) {
+                                    stringResource(R.string.request_location_1)
+                                } else {
+                                    stringResource(R.string.request_location_2)
+                                }
+                                Text(
+                                    text = textToShow,
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                Button(onClick = { locationPermissionsState.launchMultiplePermissionRequest() }) {
+                                    Text(stringResource(R.string.grant_permission))
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { onEvent(RegisterEvent.OnRegisterClicked) },
@@ -165,7 +235,10 @@ fun RegisterScreen(
                     }
                     TextButton(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { onEvent(RegisterEvent.OnRegisterClicked) },
+                        onClick = {
+                            locationPermissionsState.launchMultiplePermissionRequest()
+                            onEvent(RegisterEvent.OnRegisterClicked)
+                      },
                     ) {
                         Text(
                             text = stringResource(R.string.login_here)
